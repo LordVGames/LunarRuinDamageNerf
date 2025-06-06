@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text;
+using System.Runtime.CompilerServices;
 using UnityEngine;
-using RiskOfOptions.OptionConfigs;
-using RiskOfOptions.Options;
-using RiskOfOptions;
 using RoR2;
+using RiskOfOptions;
+using RiskOfOptions.Options;
 
 namespace LunarRuinDamageNerf
 {
@@ -19,10 +18,7 @@ namespace LunarRuinDamageNerf
             {
                 get
                 {
-                    if (_modexists == null)
-                    {
-                        _modexists = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(RiskOfOptions.PluginInfo.PLUGIN_GUID);
-                    }
+                    _modexists ??= BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(RiskOfOptions.PluginInfo.PLUGIN_GUID);
                     return (bool)_modexists;
                 }
             }

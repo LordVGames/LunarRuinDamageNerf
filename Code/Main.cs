@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using Mono.Cecil.Cil;
@@ -8,15 +10,15 @@ using MonoMod.Cil;
 using RoR2;
 using RoR2.UI;
 using R2API;
-using System.Linq;
-using System.Collections;
 
 namespace LunarRuinDamageNerf
 {
     internal static class Main
     {
+        private const int LunarRuinDamageIncreaseILVariableNumber = 28;
+
         private static CharacterSelectController _characterSelectController = null;
-        private static bool _isCharacterSelectControllerValid
+        private static bool IsCharacterSelectControllerValid
         {
             get
             {
@@ -39,6 +41,8 @@ namespace LunarRuinDamageNerf
             ILLabel skipOriginalDamageCalc = il.DefineLabel();
 
 
+            // going before line:
+            // float num2 = (float)this.body.GetBuffCount(DLC2Content.Buffs.lunarruin) * 0.1f;
             if (!c.TryGotoNext(MoveType.AfterLabel,
                 x => x.MatchLdarg(0),
                 x => x.MatchLdfld<HealthComponent>("body"),
@@ -77,14 +81,16 @@ namespace LunarRuinDamageNerf
                 // returned value needs to be a percentage of 1
                 return finalDamageIncrease *= 0.01f;
             });
-            c.Emit(OpCodes.Stloc, 27);
+            c.Emit(OpCodes.Stloc, LunarRuinDamageIncreaseILVariableNumber);
             c.Emit(OpCodes.Br, skipOriginalDamageCalc);
 
 
+            // going after line:
+            // float num2 = (float)this.body.GetBuffCount(DLC2Content.Buffs.lunarruin) * 0.1f;
             if (!c.TryGotoNext(MoveType.After,
                 x => x.MatchLdcR4(0.1f),
                 x => x.MatchMul(),
-                x => x.MatchStloc(27)
+                x => x.MatchStloc(LunarRuinDamageIncreaseILVariableNumber)
             ))
             {
                 Log.Error("COULD NOT IL HOOK IL.RoR2.HealthComponent.TakeDamageProcess PART 2");
@@ -137,7 +143,7 @@ namespace LunarRuinDamageNerf
         }
         private static void ReselectFalseSonIfSelected()
         {
-            if (!_isCharacterSelectControllerValid)
+            if (!IsCharacterSelectControllerValid)
             {
                 return;
             }
@@ -154,7 +160,7 @@ namespace LunarRuinDamageNerf
         private static IEnumerator DelaySelectFalseSon(SurvivorDef falseSonDef)
         {
             yield return null;
-            if (!_isCharacterSelectControllerValid)
+            if (!IsCharacterSelectControllerValid)
             {
                 yield break;
             }

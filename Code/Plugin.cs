@@ -2,7 +2,6 @@ using System;
 using BepInEx;
 using RoR2;
 using R2API;
-using UnityEngine.AddressableAssets;
 
 namespace LunarRuinDamageNerf
 {
@@ -14,7 +13,7 @@ namespace LunarRuinDamageNerf
         public const string PluginGUID = PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "LordVGames";
         public const string PluginName = "LunarRuinDamageNerf";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.0.1";
         public void Awake()
         {
             Log.Init(Logger);
