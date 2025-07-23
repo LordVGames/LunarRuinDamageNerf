@@ -1,11 +1,12 @@
 {
 	"name": "LunarRuinDamageNerf",
-	"version_number": "1.0.1",
+	"version_number": "1.1.0",
 	"website_url": "https://github.com/LordVGames/LunarRuinDamageNerf",
-	"description": "Allows you to nerf the damage bonus from lunar ruin, make each stack give less of a damage increase, and set a maximum value for it. Comes pre-configured for better balance!",
+	"description": "Adds many config options that allows you to nerf lunar ruin's damage nerf. Comes pre-configured for better balance!",
 	"dependencies": [
 		"bbepis-BepInExPack-5.4.2117",
 		"RiskofThunder-HookGenPatcher-1.2.5",
-		"RiskofThunder-R2API_Language-1.0.1"
+		"RiskofThunder-R2API_Language-1.0.1",
+		"MonoDetour-MonoDetour_BepInEx_5-0.6.13"
 	]
 }

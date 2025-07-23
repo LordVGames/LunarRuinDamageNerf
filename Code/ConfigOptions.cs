@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using BepInEx.Configuration;
+using MiscFixes.Modules;
 
 namespace LunarRuinDamageNerf
 {
@@ -10,59 +11,56 @@ namespace LunarRuinDamageNerf
         private const string _configSectionName = "Lunar Ruin Damage Nerf";
 
 
+        public static ConfigEntry<bool> DamageIncreaseForSkillsOnly;
         public static ConfigEntry<float> DamageIncreasePerLunarRuin;
-        private static void DamageIncreasePerLunarRuin_SettingChanged(object sender, EventArgs e)
-        {
-            Main.UpdateLunarRuinDescription();
-        }
-
-
         public static ConfigEntry<bool> EnableDiminishingDamage;
-        private static void EnableDiminishingDamage_SettingChanged(object sender, EventArgs e)
-        {
-            Main.UpdateLunarRuinDescription();
-        }
-
-
         public static ConfigEntry<float> LunarRuinDamageCap;
-        private static void LunarRuinDamageCap_SettingChanged(object sender, EventArgs e)
+        public static ConfigEntry<bool> EnableLoggingDamageIncrease;
+        private static void OnConfigOptionChanged(object sender, EventArgs e)
         {
             Main.UpdateLunarRuinDescription();
         }
-
-
-        public static ConfigEntry<bool> EnableLoggingDamageIncrease;
 
 
         internal static void BindConfigOptions(ConfigFile config)
         {
-            DamageIncreasePerLunarRuin = config.Bind<float>(
+            DamageIncreaseForSkillsOnly = config.BindOption(
                 _configSectionName,
-                "Damage increase per lunar ruin stack", 10,
-                "The increase to incoming damage for each stack of lunar ruin. Value is a percentage, so 5 means lunar ruin will increase all incoming damage by 5%. Vanilla's value is 10."
+                "Make lunar ruins damage increase only apply to skill damage",
+                "If enabled, will make the damage increase from lunar ruin only apply to skill damage and not proc/item damage.",
+                true
             );
-            EnableDiminishingDamage = config.Bind<bool>(
+            DamageIncreasePerLunarRuin = config.BindOptionSlider(
                 _configSectionName,
-                "Enable diminishing/hyperbolic scaling for lunar ruin`s damage increase.", true,
-                "If enabled, will make the damage increase for each stack of lunar ruin smaller and smaller as it approaches the cap. Vanilla does not use this."
+                "Damage increase per lunar ruin stack",
+                "The increase to incoming damage for each stack of lunar ruin. Value is a percentage, so 5 means lunar ruin will increase all incoming damage by 5%. Vanilla's value is 10.",
+                 10f
             );
-            LunarRuinDamageCap = config.Bind<float>(
+            EnableDiminishingDamage = config.BindOption(
                 _configSectionName,
-                "Lunar ruin damage cap", 145,
-                "The maximum damage increase that stacking lunar ruin can reach. Set to -1 to not have a cap, which vanilla doesn't have."
+                "Enable diminishing/hyperbolic scaling for lunar ruin`s damage increase.",
+                "If enabled, will make the damage increase for each stack of lunar ruin smaller and smaller as it approaches the cap. Vanilla does not use this.\nOld default: true",
+                false
             );
-            EnableLoggingDamageIncrease = config.Bind<bool>(
+            LunarRuinDamageCap = config.BindOptionSteppedSlider(
                 _configSectionName,
-                "Enable logging the new damage increase from lunar ruin.", false,
-                "If you're re-configuring the mod and want to know how much of a damage increase lunar ruin is giving, enable this option."
+                "Lunar ruin damage cap",
+                "The maximum damage increase that stacking lunar ruin can reach. Set to -1 to not have a cap, which vanilla doesn't have.\nOld default: 145",
+                -1,
+                1,
+                -1, 1000
+            );
+            EnableLoggingDamageIncrease = config.BindOption(
+                _configSectionName,
+                "Enable logging the new damage increase from lunar ruin.",
+                "If you're re-configuring the mod and want to know how much of a damage increase lunar ruin is giving, enable this option.",
+                false
             );
 
-            if (ModSupport.RiskOfOptionsMod.ModIsRunning)
-            {
-                DamageIncreasePerLunarRuin.SettingChanged += DamageIncreasePerLunarRuin_SettingChanged;
-                EnableDiminishingDamage.SettingChanged += EnableDiminishingDamage_SettingChanged;
-                LunarRuinDamageCap.SettingChanged += LunarRuinDamageCap_SettingChanged;
-            }
+            DamageIncreaseForSkillsOnly.SettingChanged += OnConfigOptionChanged;
+            DamageIncreasePerLunarRuin.SettingChanged += OnConfigOptionChanged;
+            EnableDiminishingDamage.SettingChanged += OnConfigOptionChanged;
+            LunarRuinDamageCap.SettingChanged += OnConfigOptionChanged;
         }
     }
 }

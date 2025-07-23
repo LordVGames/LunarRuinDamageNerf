@@ -10,6 +10,10 @@ using MonoMod.Cil;
 using RoR2;
 using RoR2.UI;
 using R2API;
+using MonoDetour;
+using MonoDetour.HookGen;
+using MonoDetour.DetourTypes;
+using MonoDetour.Cil;
 
 namespace LunarRuinDamageNerf
 {
@@ -34,45 +38,78 @@ namespace LunarRuinDamageNerf
             }
         }
 
-
-        internal static void HealthComponent_TakeDamageProcess(ILContext il)
+        [MonoDetourTargets(typeof(HealthComponent))]
+        internal static class ILHooks
         {
-            ILCursor c = new(il);
-            ILLabel skipOriginalDamageCalc = il.DefineLabel();
-
-
-            // going before line:
-            // float num2 = (float)this.body.GetBuffCount(DLC2Content.Buffs.lunarruin) * 0.1f;
-            if (!c.TryGotoNext(MoveType.AfterLabel,
-                x => x.MatchLdarg(0),
-                x => x.MatchLdfld<HealthComponent>("body"),
-                x => x.MatchLdsfld("RoR2.DLC2Content/Buffs", "lunarruin"),
-                x => x.MatchCallvirt<CharacterBody>("GetBuffCount")
-            ))
+            [MonoDetourHookInitialize]
+            internal static void Setup()
             {
-                Log.Error("COULD NOT IL HOOK IL.RoR2.HealthComponent.TakeDamageProcess PART 1");
-                Log.Warning($"il is {il}");
+                // i'm using monodetour's class, shut up
+#pragma warning disable CS0435 // Namespace conflicts with imported type
+                On.RoR2.HealthComponent.TakeDamageProcess.ILHook(SetupIL);
+#pragma warning restore CS0435 // Namespace conflicts with imported type
             }
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate<Func<HealthComponent, float>>((healthComponent) =>
+
+            private static void SetupIL(ILManipulationInfo info)
             {
-                float finalDamageIncrease = 0;
+                ILWeaver w = new(info);
+                ILLabel skipOriginalDamageCalc = w.DefineLabel();
+
+
+                // going before line:
+                // float num2 = (float)this.body.GetBuffCount(DLC2Content.Buffs.lunarruin) * 0.1f;
+                w.MatchRelaxed(
+                    x => x.MatchLdarg(0) && w.SetCurrentTo(x),
+                    x => x.MatchLdfld<HealthComponent>("body"),
+                    x => x.MatchLdsfld("RoR2.DLC2Content/Buffs", "lunarruin"),
+                    x => x.MatchCallvirt<CharacterBody>("GetBuffCount")
+                ).ThrowIfFailure()
+                .InsertBeforeCurrent(
+                    w.Create(OpCodes.Ldarg_0),
+                    w.Create(OpCodes.Ldarg_1),
+                    w.CreateCall(ChangeDamageIncrease),
+                    w.Create(OpCodes.Stloc, LunarRuinDamageIncreaseILVariableNumber),
+                    w.Create(OpCodes.Br, skipOriginalDamageCalc)
+                );
+
+
+                // going after line:
+                // float num2 = (float)this.body.GetBuffCount(DLC2Content.Buffs.lunarruin) * 0.1f;
+                w.MatchRelaxed(
+                    x => x.MatchLdcR4(0.1f),
+                    x => x.MatchMul(),
+                    x => x.MatchStloc(LunarRuinDamageIncreaseILVariableNumber) && w.SetCurrentTo(x)
+                ).ThrowIfFailure()
+                .MarkLabelToCurrentNext(skipOriginalDamageCalc);
+            }
+
+            private static float ChangeDamageIncrease(HealthComponent healthComponent, DamageInfo damageInfo)
+            {
+                float finalDamageIncrease;
                 int lunarRuinCount = healthComponent.body.GetBuffCount(DLC2Content.Buffs.lunarruin);
 
-                float lunarRuinDamageBuff = ConfigOptions.DamageIncreasePerLunarRuin.Value * lunarRuinCount;
-                if (ConfigOptions.EnableDiminishingDamage.Value)
+                // could make this better but idc rn
+                if (ConfigOptions.DamageIncreaseForSkillsOnly.Value && !damageInfo.damageType.IsDamageSourceSkillBased)
                 {
-                    finalDamageIncrease = GetHyperbolic(ConfigOptions.DamageIncreasePerLunarRuin.Value, ConfigOptions.LunarRuinDamageCap.Value, lunarRuinDamageBuff);
-                }
-                else if (ConfigOptions.LunarRuinDamageCap.Value != -1)
-                {
-                    finalDamageIncrease = MathF.Min(lunarRuinDamageBuff, ConfigOptions.LunarRuinDamageCap.Value);
+                    finalDamageIncrease = 0;
                 }
                 else
                 {
-                    finalDamageIncrease = lunarRuinDamageBuff;
+                    float lunarRuinDamageBuff = ConfigOptions.DamageIncreasePerLunarRuin.Value * lunarRuinCount;
+                    if (ConfigOptions.EnableDiminishingDamage.Value)
+                    {
+                        finalDamageIncrease = GetHyperbolic(ConfigOptions.DamageIncreasePerLunarRuin.Value, ConfigOptions.LunarRuinDamageCap.Value, lunarRuinDamageBuff);
+                    }
+                    else if (ConfigOptions.LunarRuinDamageCap.Value != -1)
+                    {
+                        finalDamageIncrease = MathF.Min(lunarRuinDamageBuff, ConfigOptions.LunarRuinDamageCap.Value);
+                    }
+                    else
+                    {
+                        finalDamageIncrease = lunarRuinDamageBuff;
+                    }
                 }
-                
+
 
                 if (ConfigOptions.EnableLoggingDamageIncrease.Value)
                 {
@@ -80,24 +117,10 @@ namespace LunarRuinDamageNerf
                 }
                 // returned value needs to be a percentage of 1
                 return finalDamageIncrease *= 0.01f;
-            });
-            c.Emit(OpCodes.Stloc, LunarRuinDamageIncreaseILVariableNumber);
-            c.Emit(OpCodes.Br, skipOriginalDamageCalc);
-
-
-            // going after line:
-            // float num2 = (float)this.body.GetBuffCount(DLC2Content.Buffs.lunarruin) * 0.1f;
-            if (!c.TryGotoNext(MoveType.After,
-                x => x.MatchLdcR4(0.1f),
-                x => x.MatchMul(),
-                x => x.MatchStloc(LunarRuinDamageIncreaseILVariableNumber)
-            ))
-            {
-                Log.Error("COULD NOT IL HOOK IL.RoR2.HealthComponent.TakeDamageProcess PART 2");
-                Log.Warning($"il is {il}");
             }
-            c.MarkLabel(skipOriginalDamageCalc);
         }
+
+
         // from WellRoundedBalance's SharedBase.cs
         private static float GetHyperbolic(float firstStack, float cap, float chance)
         {
@@ -135,7 +158,14 @@ namespace LunarRuinDamageNerf
             }
             Log.Debug(extraNotes);
 
-            newLunarRuinDescription = Language.GetStringFormatted("KEYWORD_LUNARRUIN_NERFED", ConfigOptions.DamageIncreasePerLunarRuin.Value, extraNotes);
+            if (ConfigOptions.DamageIncreaseForSkillsOnly.Value)
+            {
+                newLunarRuinDescription = Language.GetStringFormatted("KEYWORD_LUNARRUIN_NERFED_SKILLSONLY", ConfigOptions.DamageIncreasePerLunarRuin.Value, extraNotes);
+            }
+            else
+            {
+                newLunarRuinDescription = Language.GetStringFormatted("KEYWORD_LUNARRUIN_NERFED", ConfigOptions.DamageIncreasePerLunarRuin.Value, extraNotes);
+            }
             Log.Debug(newLunarRuinDescription);
             LanguageAPI.AddOverlay("KEYWORD_LUNARRUIN", newLunarRuinDescription);
             // bandaid fix for the keyword text not updating after changing the token's text

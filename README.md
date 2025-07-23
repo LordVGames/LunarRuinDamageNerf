@@ -3,6 +3,8 @@
 False son's lunar ruin from the start was almost too good when stacked a bunch, and now with the new + rebalanced skills it's much easier to spam lunar ruin and get what's practically a free win on any tanky enemy. To fix that (or at least make it not as absurd), this mod makes it so that each stack of lunar ruin adds less and less of a damage increase.
 
 The following values are configurable (in-game if you have [Risk Of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) installed):
+- Make lunar ruin's damage increase only apply to damage from skills
+- - This is to prevent the damage increase from applying multiple times due to procs also receiving the damage bonus.
 - Damage increase per lunar ruin
 - - Set to 10% by default like in vanilla, but with the other features of the mod it isn't really.
 - Diminishing/hyperbolic scaling for stacking lunar ruin's damage

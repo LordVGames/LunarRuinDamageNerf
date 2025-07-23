@@ -1,11 +1,13 @@
 {
   "strings": {
     "KEYWORD_LUNARRUIN_NERFED": "<style=cKeywordName>Lunar Ruin</style><style=cSub>Enemies hit take <style=cIsDamage>+{0}%</style> more damage from all sources and reduces healing for <style=cIsUtility>5 seconds.</style> <i>Lunar Ruin can stack.{1}</i></style>",
+    "KEYWORD_LUNARRUIN_NERFED_SKILLSONLY": "<style=cKeywordName>Lunar Ruin</style><style=cSub>Enemies hit take <style=cIsDamage>+{0}%</style> more damage from skills and reduces healing for <style=cIsUtility>5 seconds.</style> <i>Lunar Ruin can stack.{1}</i></style>",
     "KEYWORD_LUNARRUIN_DAMAGECAPPED": "Lunar Ruin's damage increase is capped at +{0}%.",
     "KEYWORD_LUNARRUIN_HYPERBOLICSTACKING": "Each stack of Lunar Ruin adds a smaller damage increase compared previous one."
   },
   "en": {
     "KEYWORD_LUNARRUIN_NERFED": "<style=cKeywordName>Lunar Ruin</style><style=cSub>Enemies hit take <style=cIsDamage>+{0}%</style> more damage from all sources and reduces healing for <style=cIsUtility>5 seconds.</style> <i>Lunar Ruin can stack.{1}</i></style>",
+    "KEYWORD_LUNARRUIN_NERFED_SKILLSONLY": "<style=cKeywordName>Lunar Ruin</style><style=cSub>Enemies hit take <style=cIsDamage>+{0}%</style> more damage from skills and reduces healing for <style=cIsUtility>5 seconds.</style> <i>Lunar Ruin can stack.{1}</i></style>",
     "KEYWORD_LUNARRUIN_DAMAGECAPPED": "Lunar Ruin's damage increase is capped at +{0}%.",
     "KEYWORD_LUNARRUIN_HYPERBOLICSTACKING": "Each stack of Lunar Ruin adds a smaller damage increase compared previous one."
   }
