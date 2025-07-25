@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Fixed text in a few places
+
 ## 1.1.0
 
 - Added a setting to make lunar ruin's damage nerf only apply to skill damage to prevent the damage bonus double-dipping for proc damage.

@@ -13,13 +13,13 @@ namespace LunarRuinDamageNerf
         public const string PluginGUID = PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "LordVGames";
         public const string PluginName = "LunarRuinDamageNerf";
-        public const string PluginVersion = "1.1.0";
+        public const string PluginVersion = "1.1.1";
         public void Awake()
         {
             Log.Init(Logger);
             ConfigOptions.BindConfigOptions(Config);
             Config.WipeConfig();
-            Main.ILHooks.Setup();
+            ILHooks.Setup();
             On.RoR2.UI.CharacterSelectController.Awake += Main.CharacterSelectController_Awake;
             On.RoR2.UI.CharacterSelectController.OnDisable += Main.CharacterSelectController_OnDisable;
             RoR2Application.onLoad += () =>

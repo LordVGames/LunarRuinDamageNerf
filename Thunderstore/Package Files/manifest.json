@@ -1,8 +1,8 @@
 {
 	"name": "LunarRuinDamageNerf",
-	"version_number": "1.1.0",
+	"version_number": "1.1.1",
 	"website_url": "https://github.com/LordVGames/LunarRuinDamageNerf",
-	"description": "Adds many config options that allows you to nerf lunar ruin's damage nerf. Comes pre-configured for better balance!",
+	"description": "Adds many config options that allows you to nerf lunar ruin's damage boost. Comes pre-configured for better balance!",
 	"dependencies": [
 		"bbepis-BepInExPack-5.4.2117",
 		"RiskofThunder-HookGenPatcher-1.2.5",

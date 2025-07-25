@@ -15,6 +15,7 @@ namespace LunarRuinDamageNerf
         public static ConfigEntry<float> DamageIncreasePerLunarRuin;
         public static ConfigEntry<bool> EnableDiminishingDamage;
         public static ConfigEntry<float> LunarRuinDamageCap;
+        //public static ConfigEntry<bool> AllowHiddenDot;
         public static ConfigEntry<bool> EnableLoggingDamageIncrease;
         private static void OnConfigOptionChanged(object sender, EventArgs e)
         {
@@ -45,11 +46,17 @@ namespace LunarRuinDamageNerf
             LunarRuinDamageCap = config.BindOptionSteppedSlider(
                 _configSectionName,
                 "Lunar ruin damage cap",
-                "The maximum damage increase that stacking lunar ruin can reach. Set to -1 to not have a cap, which vanilla doesn't have.\nOld default: 145",
+                "The maximum damage increase that stacking lunar ruin can reach. Vanilla does not have a maximum damage increase. Set to -1 for no maximum damage boost.\nOld default: 145",
                 -1,
                 1,
                 -1, 1000
             );
+            /*AllowHiddenDot = config.BindOption(
+                _configSectionName,
+                "Enable hidden lunar ruin damage-over-time debuff",
+                "Toggles application of lunar ruin's hidden damage-over-time debuff. It deals little bit of damage every 3 seconds, up to 2 times, and contributes to death mark alongside lunar ruin itself.",
+                false
+            );*/
             EnableLoggingDamageIncrease = config.BindOption(
                 _configSectionName,
                 "Enable logging the new damage increase from lunar ruin.",
